@@ -28,6 +28,13 @@ jobs:
       with:
         terraform_version: 1.5.0
 
+      # Set debug environment variables to get more information
+    - name: Set Debugging for GitHub Actions
+      run: |
+        echo "ACTIONS_STEP_DEBUG=true" >> $GITHUB_ENV
+        echo "ACTIONS_RUNNER_DEBUG=true" >> $GITHUB_ENV
+        echo "Debugging enabled!"
+
       # Set up Azure login with Service Principal
     - name: Set up Azure Credentials
       uses: azure/login@v1
@@ -42,9 +49,26 @@ jobs:
         allow-no-subscriptions: false
         audience: api://AzureADTokenExchange
 
+      # Debugging step to check environment variables and login status
+    - name: Debug Azure CLI login
+      run: |
+        echo "Checking Azure CLI Version"
+        az --version
+        
+        echo "Checking environment variables"
+        printenv
+        
+        echo "Checking logged-in account"
+        az account show
+        
+        echo "Listing all available subscriptions"
+        az account list --output table
+
       # Verify Azure CLI login
     - name: Verify Azure CLI
-      run: az account show
+      run: |
+        echo "Verifying Azure CLI login"
+        az account show
 
       # Terraform Init with Azure Blob Storage Backend
     - name: Terraform Init with Azure Backend
@@ -74,7 +98,7 @@ jobs:
     - name: Terraform Apply
       if: github.ref == 'refs/heads/main' && github.event_name == 'push'
       run: terraform apply -auto-approve tfplan
-      timeout-minutes: 9
+      timeout-minutes: 10
 
     # Destroy resources (optional, to destroy all resources after testing)
     # - name: Terraform Destroy
