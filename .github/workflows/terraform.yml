@@ -16,7 +16,7 @@ jobs:
       contents: read   # Required to checkout the repository
     defaults:
       run:
-        working-directory: ./terraform/code/  # Ensure this points to the correct path if it's different
+        working-directory: ./terraform  # Ensure this points to the correct path if it's different
     steps:
       # Checkout repository
     - name: Checkout repository
