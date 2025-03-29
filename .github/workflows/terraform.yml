@@ -1,3 +1,114 @@
+# name: Terraform Deployment
+
+# on:
+#   push:
+#     branches: [ main ]
+#   pull_request:
+#     branches: [ main ]
+#   workflow_dispatch:
+
+# jobs:
+#   terraform:
+#     runs-on: ubuntu-latest
+#     environment: Azure
+#     permissions:
+#       id-token: write
+#       contents: read
+#     defaults:
+#       run:
+#         working-directory: ./terraform
+#     steps:
+#       - name: Checkout repository
+#         uses: actions/checkout@v3
+      
+#       - name: Setup Terraform
+#         uses: hashicorp/setup-terraform@v2
+#         with:
+#           terraform_version: 1.5.0
+
+#       - name: Set up Azure Credentials
+#         uses: azure/login@v1
+#         with:
+#           creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+#       - name: Create Terraform Backend Resources
+#         run: |
+#           # Create resource group if it doesn't exist
+#           az group create --name vj-tf-backend --location "West US 2"
+          
+#           # Create storage account if it doesn't exist
+#           az storage account create --name vjtfbackendsa2025 --resource-group vj-tf-backend --sku Standard_LRS
+          
+#           # Create container if it doesn't exist
+#           az storage container create --name terraform-state --account-name vjtfbackendsa2025
+
+#       - name: Terraform Init with Azure Backend
+#         run: |
+#           terraform init \
+#             -backend-config="resource_group_name=vj-tf-backend" \
+#             -backend-config="storage_account_name=vjtfbackendsa2025" \
+#             -backend-config="container_name=terraform-state" \
+#             -backend-config="key=terraform.tfstate"
+#         env:
+#           TF_VAR_client_id: ${{ fromJSON(secrets.AZURE_CREDENTIALS).clientId }}
+#           TF_VAR_client_secret: ${{ fromJSON(secrets.AZURE_CREDENTIALS).clientSecret }}
+#           TF_VAR_tenant_id: ${{ fromJSON(secrets.AZURE_CREDENTIALS).tenantId }}
+#           TF_VAR_subscription_id: ${{ fromJSON(secrets.AZURE_CREDENTIALS).subscriptionId }}
+#           ARM_CLIENT_ID: ${{ fromJSON(secrets.AZURE_CREDENTIALS).clientId }}
+#           ARM_CLIENT_SECRET: ${{ fromJSON(secrets.AZURE_CREDENTIALS).clientSecret }}
+#           ARM_TENANT_ID: ${{ fromJSON(secrets.AZURE_CREDENTIALS).tenantId }}
+#           ARM_SUBSCRIPTION_ID: ${{ fromJSON(secrets.AZURE_CREDENTIALS).subscriptionId }}
+
+#         # Terraform Plan
+#       - name: Terraform Plan
+#         run: terraform plan -out=tfplan
+#         timeout-minutes: 5
+#         env:
+#           TF_VAR_client_id: ${{ fromJSON(secrets.AZURE_CREDENTIALS).clientId }}
+#           TF_VAR_client_secret: ${{ fromJSON(secrets.AZURE_CREDENTIALS).clientSecret }}
+#           TF_VAR_tenant_id: ${{ fromJSON(secrets.AZURE_CREDENTIALS).tenantId }}
+#           TF_VAR_subscription_id: ${{ fromJSON(secrets.AZURE_CREDENTIALS).subscriptionId }}
+#           ARM_CLIENT_ID: ${{ fromJSON(secrets.AZURE_CREDENTIALS).clientId }}
+#           ARM_CLIENT_SECRET: ${{ fromJSON(secrets.AZURE_CREDENTIALS).clientSecret }}
+#           ARM_TENANT_ID: ${{ fromJSON(secrets.AZURE_CREDENTIALS).tenantId }}
+#           ARM_SUBSCRIPTION_ID: ${{ fromJSON(secrets.AZURE_CREDENTIALS).subscriptionId }}
+
+#         # Terraform Apply
+#       - name: Terraform Apply
+#         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+#         run: terraform apply -auto-approve tfplan
+#         timeout-minutes: 10
+#         env:
+#           TF_VAR_client_id: ${{ fromJSON(secrets.AZURE_CREDENTIALS).clientId }}
+#           TF_VAR_client_secret: ${{ fromJSON(secrets.AZURE_CREDENTIALS).clientSecret }}
+#           TF_VAR_tenant_id: ${{ fromJSON(secrets.AZURE_CREDENTIALS).tenantId }}
+#           TF_VAR_subscription_id: ${{ fromJSON(secrets.AZURE_CREDENTIALS).subscriptionId }}
+#           ARM_CLIENT_ID: ${{ fromJSON(secrets.AZURE_CREDENTIALS).clientId }}
+#           ARM_CLIENT_SECRET: ${{ fromJSON(secrets.AZURE_CREDENTIALS).clientSecret }}
+#           ARM_TENANT_ID: ${{ fromJSON(secrets.AZURE_CREDENTIALS).tenantId }}
+#           ARM_SUBSCRIPTION_ID: ${{ fromJSON(secrets.AZURE_CREDENTIALS).subscriptionId }}
+
+
+
+#       # # Destroy resources (optional, to destroy all resources after testing)
+#       # - name: Terraform Destroy
+#       #   run: |
+#       #     echo "DESTROYING ALL RESOURCES!"
+#       #     terraform destroy -auto-approve
+#       #   timeout-minutes: 12
+#       #   env:
+#       #     TF_VAR_client_id: ${{ fromJSON(secrets.AZURE_CREDENTIALS).clientId }}
+#       #     TF_VAR_client_secret: ${{ fromJSON(secrets.AZURE_CREDENTIALS).clientSecret }}
+#       #     TF_VAR_tenant_id: ${{ fromJSON(secrets.AZURE_CREDENTIALS).tenantId }}
+#       #     TF_VAR_subscription_id: ${{ fromJSON(secrets.AZURE_CREDENTIALS).subscriptionId }}
+#       #     ARM_CLIENT_ID: ${{ fromJSON(secrets.AZURE_CREDENTIALS).clientId }}
+#       #     ARM_CLIENT_SECRET: ${{ fromJSON(secrets.AZURE_CREDENTIALS).clientSecret }}
+#       #     ARM_TENANT_ID: ${{ fromJSON(secrets.AZURE_CREDENTIALS).tenantId }}
+#       #     ARM_SUBSCRIPTION_ID: ${{ fromJSON(secrets.AZURE_CREDENTIALS).subscriptionId }}
+
+
+
+
 name: Terraform Deployment
 
 on:
@@ -17,6 +128,17 @@ jobs:
     defaults:
       run:
         working-directory: ./terraform
+    env:
+      # Define environment variables globally for all steps
+      TF_VAR_client_id: ${{ fromJSON(secrets.AZURE_CREDENTIALS).clientId }}
+      TF_VAR_client_secret: ${{ fromJSON(secrets.AZURE_CREDENTIALS).clientSecret }}
+      TF_VAR_tenant_id: ${{ fromJSON(secrets.AZURE_CREDENTIALS).tenantId }}
+      TF_VAR_subscription_id: ${{ fromJSON(secrets.AZURE_CREDENTIALS).subscriptionId }}
+      ARM_CLIENT_ID: ${{ fromJSON(secrets.AZURE_CREDENTIALS).clientId }}
+      ARM_CLIENT_SECRET: ${{ fromJSON(secrets.AZURE_CREDENTIALS).clientSecret }}
+      ARM_TENANT_ID: ${{ fromJSON(secrets.AZURE_CREDENTIALS).tenantId }}
+      ARM_SUBSCRIPTION_ID: ${{ fromJSON(secrets.AZURE_CREDENTIALS).subscriptionId }}
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -49,59 +171,19 @@ jobs:
             -backend-config="storage_account_name=vjtfbackendsa2025" \
             -backend-config="container_name=terraform-state" \
             -backend-config="key=terraform.tfstate"
-        env:
-          TF_VAR_client_id: ${{ fromJSON(secrets.AZURE_CREDENTIALS).clientId }}
-          TF_VAR_client_secret: ${{ fromJSON(secrets.AZURE_CREDENTIALS).clientSecret }}
-          TF_VAR_tenant_id: ${{ fromJSON(secrets.AZURE_CREDENTIALS).tenantId }}
-          TF_VAR_subscription_id: ${{ fromJSON(secrets.AZURE_CREDENTIALS).subscriptionId }}
-          ARM_CLIENT_ID: ${{ fromJSON(secrets.AZURE_CREDENTIALS).clientId }}
-          ARM_CLIENT_SECRET: ${{ fromJSON(secrets.AZURE_CREDENTIALS).clientSecret }}
-          ARM_TENANT_ID: ${{ fromJSON(secrets.AZURE_CREDENTIALS).tenantId }}
-          ARM_SUBSCRIPTION_ID: ${{ fromJSON(secrets.AZURE_CREDENTIALS).subscriptionId }}
 
-      #   # Terraform Plan
-      # - name: Terraform Plan
-      #   run: terraform plan -out=tfplan
-      #   timeout-minutes: 5
-      #   env:
-      #     TF_VAR_client_id: ${{ fromJSON(secrets.AZURE_CREDENTIALS).clientId }}
-      #     TF_VAR_client_secret: ${{ fromJSON(secrets.AZURE_CREDENTIALS).clientSecret }}
-      #     TF_VAR_tenant_id: ${{ fromJSON(secrets.AZURE_CREDENTIALS).tenantId }}
-      #     TF_VAR_subscription_id: ${{ fromJSON(secrets.AZURE_CREDENTIALS).subscriptionId }}
-      #     ARM_CLIENT_ID: ${{ fromJSON(secrets.AZURE_CREDENTIALS).clientId }}
-      #     ARM_CLIENT_SECRET: ${{ fromJSON(secrets.AZURE_CREDENTIALS).clientSecret }}
-      #     ARM_TENANT_ID: ${{ fromJSON(secrets.AZURE_CREDENTIALS).tenantId }}
-      #     ARM_SUBSCRIPTION_ID: ${{ fromJSON(secrets.AZURE_CREDENTIALS).subscriptionId }}
+      - name: Terraform Plan
+        run: terraform plan -out=tfplan
+        timeout-minutes: 5
 
-      #   # Terraform Apply
-      # - name: Terraform Apply
-      #   if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-      #   run: terraform apply -auto-approve tfplan
-      #   timeout-minutes: 10
-      #   env:
-      #     TF_VAR_client_id: ${{ fromJSON(secrets.AZURE_CREDENTIALS).clientId }}
-      #     TF_VAR_client_secret: ${{ fromJSON(secrets.AZURE_CREDENTIALS).clientSecret }}
-      #     TF_VAR_tenant_id: ${{ fromJSON(secrets.AZURE_CREDENTIALS).tenantId }}
-      #     TF_VAR_subscription_id: ${{ fromJSON(secrets.AZURE_CREDENTIALS).subscriptionId }}
-      #     ARM_CLIENT_ID: ${{ fromJSON(secrets.AZURE_CREDENTIALS).clientId }}
-      #     ARM_CLIENT_SECRET: ${{ fromJSON(secrets.AZURE_CREDENTIALS).clientSecret }}
-      #     ARM_TENANT_ID: ${{ fromJSON(secrets.AZURE_CREDENTIALS).tenantId }}
-      #     ARM_SUBSCRIPTION_ID: ${{ fromJSON(secrets.AZURE_CREDENTIALS).subscriptionId }}
+      - name: Terraform Apply
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        run: terraform apply -auto-approve tfplan
+        timeout-minutes: 10
 
-
-
-      # Destroy resources (optional, to destroy all resources after testing)
-      - name: Terraform Destroy
-        run: |
-          echo "DESTROYING ALL RESOURCES!"
-          terraform destroy -auto-approve
-        timeout-minutes: 12
-        env:
-          TF_VAR_client_id: ${{ fromJSON(secrets.AZURE_CREDENTIALS).clientId }}
-          TF_VAR_client_secret: ${{ fromJSON(secrets.AZURE_CREDENTIALS).clientSecret }}
-          TF_VAR_tenant_id: ${{ fromJSON(secrets.AZURE_CREDENTIALS).tenantId }}
-          TF_VAR_subscription_id: ${{ fromJSON(secrets.AZURE_CREDENTIALS).subscriptionId }}
-          ARM_CLIENT_ID: ${{ fromJSON(secrets.AZURE_CREDENTIALS).clientId }}
-          ARM_CLIENT_SECRET: ${{ fromJSON(secrets.AZURE_CREDENTIALS).clientSecret }}
-          ARM_TENANT_ID: ${{ fromJSON(secrets.AZURE_CREDENTIALS).tenantId }}
-          ARM_SUBSCRIPTION_ID: ${{ fromJSON(secrets.AZURE_CREDENTIALS).subscriptionId }}
+      # Optional: Terraform Destroy
+      # - name: Terraform Destroy
+      #   run: |
+      #     echo "DESTROYING ALL RESOURCES!"
+      #     terraform destroy -auto-approve
+      #   timeout-minutes: 12
