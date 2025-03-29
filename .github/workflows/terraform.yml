@@ -33,20 +33,12 @@ jobs:
       uses: azure/login@v1
       with:
         creds: ${{ secrets.AZURE_CREDENTIALS }}  # Use the JSON credentials stored as a secret in GitHub
-        enable-AzPSSession: false
-        environment: azurecloud
-        allow-no-subscriptions: false
-        audience: api://AzureADTokenExchange
-        auth-type: SERVICE_PRINCIPAL
 
       # Debugging step to check environment variables and login status
     - name: Debug Azure CLI login
       run: |
         echo "Checking Azure CLI Version"
         az --version
-        
-        echo "Checking environment variables"
-        printenv
         
         echo "Checking logged-in account"
         az account show
