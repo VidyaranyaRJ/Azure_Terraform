@@ -172,18 +172,18 @@ jobs:
             -backend-config="container_name=terraform-state" \
             -backend-config="key=terraform.tfstate"
 
-      - name: Terraform Plan
-        run: terraform plan -out=tfplan
-        timeout-minutes: 5
+      # - name: Terraform Plan
+      #   run: terraform plan -out=tfplan
+      #   timeout-minutes: 5
 
-      - name: Terraform Apply
-        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-        run: terraform apply -auto-approve tfplan
-        timeout-minutes: 10
+      # - name: Terraform Apply
+      #   if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+      #   run: terraform apply -auto-approve tfplan
+      #   timeout-minutes: 10
 
       # Optional: Terraform Destroy
-      # - name: Terraform Destroy
-      #   run: |
-      #     echo "DESTROYING ALL RESOURCES!"
-      #     terraform destroy -auto-approve
-      #   timeout-minutes: 12
+      - name: Terraform Destroy
+        run: |
+          echo "DESTROYING ALL RESOURCES!"
+          terraform destroy -auto-approve
+        timeout-minutes: 12
