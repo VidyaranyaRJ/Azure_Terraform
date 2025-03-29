@@ -5,62 +5,39 @@ on:
     branches: [ main ]
   pull_request:
     branches: [ main ]
-  workflow_dispatch:
 
 jobs:
   terraform:
     runs-on: ubuntu-latest
-    environment: Azure
-    defaults:
-      run:
-        working-directory: ./terraform/code/
+    
     steps:
-      # Checkout repository
-    - name: Checkout repository
-      uses: actions/checkout@v3
-      
-      # Set up Terraform
+    - uses: actions/checkout@v3
+    
     - name: Setup Terraform
       uses: hashicorp/setup-terraform@v2
-      with:
-        terraform_version: 1.5.0
-
-      # Set up Azure login with credentials JSON
+      
     - name: Set up Azure Credentials
       uses: azure/login@v1
       with:
         creds: ${{ secrets.AZURE_CREDENTIALS }}
-
-      # Verify Azure CLI login
-    - name: Verify Azure CLI
-      run: az account show
-
-      # Terraform Init with Azure Backend
+    
     - name: Terraform Init with Azure Backend
       run: |
         terraform init \
           -backend-config="resource_group_name=vj-tf-backend" \
           -backend-config="storage_account_name=vjtestsa1" \
           -backend-config="container_name=terraform-state" \
-          -backend-config="key=terraform.tfstate" \
-          -backend-config="location=westus2"
-
-      # Terraform Format
+          -backend-config="key=terraform.tfstate"
+    
     - name: Terraform Format
       run: terraform fmt -check
-      continue-on-error: true
-
-      # Terraform Validate
+    
     - name: Terraform Validate
       run: terraform validate
-
-      # Terraform Plan
+    
     - name: Terraform Plan
-      run: terraform plan -out=tfplan
-      timeout-minutes: 5
-
-      # Terraform Apply (only on push to main)
+      run: terraform plan
+      
     - name: Terraform Apply
       if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-      run: terraform apply -auto-approve tfplan
-      timeout-minutes: 10
+      run: terraform apply -auto-approve

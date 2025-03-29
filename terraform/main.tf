@@ -1,12 +1,18 @@
+# backend.tf
 terraform {
-  backend "s3" {
-    bucket = "vjtestsa1"  # Your S3 bucket name
-    key    = "terraform.tfstate"  # Path within the bucket
-    region = "West US 2"  # Specify the region where the S3 bucket is located
+  backend "azurerm" {
+    # The values will be provided via backend-config in the workflow
+    resource_group_name  = "vj-tf-backend"
+    storage_account_name = "vjtestsa1"
+    container_name       = "terraform-state"
+    key                  = "terraform.tfstate"
   }
 }
 
-
+# main.tf
+provider "azurerm" {
+  features {}
+}
 
 variable "prefix" {
   default = "tfvmex"
