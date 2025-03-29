@@ -1,3 +1,101 @@
+# name: Terraform Deployment
+
+# on:
+#   push:
+#     branches: [ main ]
+#   pull_request:
+#     branches: [ main ]
+#   workflow_dispatch:
+
+# jobs:
+#   terraform:
+#     runs-on: ubuntu-latest
+#     environment: Azure
+#     permissions:
+#       id-token: write  # Required for OIDC token exchange
+#       contents: read   # Required to checkout the repository
+#     defaults:
+#       run:
+#         working-directory: ./terraform  # Ensure this points to the correct path if it's different
+#     steps:
+#       # Checkout repository
+#     - name: Checkout repository
+#       uses: actions/checkout@v3
+      
+#       # Set up Terraform
+#     - name: Setup Terraform
+#       uses: hashicorp/setup-terraform@v2
+#       with:
+#         terraform_version: 1.5.0
+
+#       # Set up Azure login with Service Principal using creds
+#     - name: Set up Azure Credentials
+#       uses: azure/login@v1
+#       with:
+#         creds: ${{ secrets.AZURE_CREDENTIALS }}  # Use the JSON credentials stored as a secret in GitHub
+#         enable-AzPSSession: false
+#         environment: azurecloud
+#         allow-no-subscriptions: false
+#         audience: api://AzureADTokenExchange
+#         auth-type: SERVICE_PRINCIPAL
+
+#       # Debugging step to check environment variables and login status
+#     - name: Debug Azure CLI login
+#       run: |
+#         echo "Checking Azure CLI Version"
+#         az --version
+        
+#         echo "Checking environment variables"
+#         printenv
+        
+#         echo "Checking logged-in account"
+#         az account show
+        
+#         echo "Listing all available subscriptions"
+#         az account list --output table
+
+#       # Verify Azure CLI login
+#     - name: Verify Azure CLI
+#       run: |
+#         echo "Verifying Azure CLI login"
+#         az account show
+
+#       # Terraform Init with Azure Blob Storage Backend
+#     - name: Terraform Init with Azure Backend
+#       run: |
+#         terraform init \
+#           -backend-config="resource_group_name=vj-tf-backend" \
+#           -backend-config="storage_account_name=vjtestsa1" \
+#           -backend-config="container_name=terraform-state" \
+#           -backend-config="key=terraform.tfstate" \
+#           -backend-config="region=West US 2"
+
+#       # Terraform Format
+#     - name: Terraform Format
+#       run: terraform fmt -check
+#       continue-on-error: true
+
+#       # Terraform Validate
+#     - name: Terraform Validate
+#       run: terraform validate
+
+#       # Terraform Plan
+#     - name: Terraform Plan
+#       run: terraform plan -out=tfplan
+#       timeout-minutes: 5
+
+#       # Terraform Apply
+#     - name: Terraform Apply
+#       if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+#       run: terraform apply -auto-approve tfplan
+#       timeout-minutes: 10
+
+#     # Destroy resources (optional, to destroy all resources after testing)
+#     # - name: Terraform Destroy
+#     #   run: |
+#     #     echo "DESTROYING ALL RESOURCES!"
+#     #     terraform destroy -auto-approve
+#     #   timeout-minutes: 12
 name: Terraform Deployment
 
 on:
@@ -67,8 +165,7 @@ jobs:
           -backend-config="resource_group_name=vj-tf-backend" \
           -backend-config="storage_account_name=vjtestsa1" \
           -backend-config="container_name=terraform-state" \
-          -backend-config="key=terraform.tfstate" \
-          -backend-config="region=West US 2"
+          -backend-config="key=terraform.tfstate"
 
       # Terraform Format
     - name: Terraform Format
