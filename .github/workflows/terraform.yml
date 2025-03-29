@@ -16,7 +16,7 @@ jobs:
       contents: read   # Required to checkout the repository
     defaults:
       run:
-        working-directory: ./terraform/
+        working-directory: ./terraform/code/  # Ensure this points to the correct path if it's different
     steps:
       # Checkout repository
     - name: Checkout repository
@@ -33,6 +33,11 @@ jobs:
       uses: azure/login@v1
       with:
         creds: ${{ secrets.AZURE_CREDENTIALS }}  # Use the JSON credentials stored as a secret in GitHub
+        enable-AzPSSession: false
+        environment: azurecloud
+        allow-no-subscriptions: false
+        audience: api://AzureADTokenExchange
+        auth-type: SERVICE_PRINCIPAL
 
       # Debugging step to check environment variables and login status
     - name: Debug Azure CLI login
