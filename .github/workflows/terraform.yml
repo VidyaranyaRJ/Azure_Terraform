@@ -11,9 +11,6 @@ jobs:
   terraform:
     runs-on: ubuntu-latest
     environment: Azure
-    permissions:
-      id-token: write  # Required for OIDC authentication
-      contents: read   # Required to checkout the repository
     defaults:
       run:
         working-directory: ./terraform/code/
@@ -28,13 +25,11 @@ jobs:
       with:
         terraform_version: 1.5.0
 
-      # Set up Azure login with OIDC
+      # Set up Azure login with Service Principal and Secret
     - name: Set up Azure Credentials
       uses: azure/login@v1
       with:
-        client-id: ${{ secrets.AZURE_CLIENT_ID }}
-        tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-        subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
 
       # Verify Azure CLI login
     - name: Verify Azure CLI
