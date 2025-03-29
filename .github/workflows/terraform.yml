@@ -74,7 +74,7 @@ jobs:
     - name: Terraform Apply
       if: github.ref == 'refs/heads/main' && github.event_name == 'push'
       run: terraform apply -auto-approve tfplan
-      timeout-minutes: 10
+      timeout-minutes: 9
 
     # Destroy resources (optional, to destroy all resources after testing)
     # - name: Terraform Destroy
