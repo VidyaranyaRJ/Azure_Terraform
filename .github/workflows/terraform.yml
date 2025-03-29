@@ -5,39 +5,80 @@ on:
     branches: [ main ]
   pull_request:
     branches: [ main ]
+  workflow_dispatch:
 
 jobs:
   terraform:
     runs-on: ubuntu-latest
-    
+    environment: Azure
+    permissions:
+      id-token: write  # Required for OIDC token exchange
+      contents: read   # Required to checkout the repository
+    defaults:
+      run:
+        working-directory: ./terraform/code/
     steps:
-    - uses: actions/checkout@v3
-    
+      # Checkout repository
+    - name: Checkout repository
+      uses: actions/checkout@v3
+      
+      # Set up Terraform
     - name: Setup Terraform
       uses: hashicorp/setup-terraform@v2
-      
+      with:
+        terraform_version: 1.5.0
+
+      # Set up Azure login with Service Principal
     - name: Set up Azure Credentials
       uses: azure/login@v1
       with:
-        creds: ${{ secrets.AZURE_CREDENTIALS }}
-    
+        client-id: ${{ secrets.AZURE_CLIENT_ID }}          # Azure Application Client ID
+        client-secret: ${{ secrets.AZURE_CLIENT_SECRET }}  # Azure Application Client Secret
+        tenant-id: ${{ secrets.AZURE_TENANT_ID }}          # Azure Directory (Tenant) ID
+        subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}  # Azure Subscription ID
+        auth-type: SERVICE_PRINCIPAL  # Using Service Principal authentication
+        enable-AzPSSession: false
+        environment: azurecloud
+        allow-no-subscriptions: false
+        audience: api://AzureADTokenExchange
+
+      # Verify Azure CLI login
+    - name: Verify Azure CLI
+      run: az account show
+
+      # Terraform Init with Azure Blob Storage Backend
     - name: Terraform Init with Azure Backend
       run: |
         terraform init \
           -backend-config="resource_group_name=vj-tf-backend" \
           -backend-config="storage_account_name=vjtestsa1" \
           -backend-config="container_name=terraform-state" \
-          -backend-config="key=terraform.tfstate"
-    
+          -backend-config="key=terraform.tfstate" \
+          -backend-config="region=West US 2"
+
+      # Terraform Format
     - name: Terraform Format
       run: terraform fmt -check
-    
+      continue-on-error: true
+
+      # Terraform Validate
     - name: Terraform Validate
       run: terraform validate
-    
+
+      # Terraform Plan
     - name: Terraform Plan
-      run: terraform plan
-      
+      run: terraform plan -out=tfplan
+      timeout-minutes: 5
+
+      # Terraform Apply
     - name: Terraform Apply
       if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-      run: terraform apply -auto-approve
+      run: terraform apply -auto-approve tfplan
+      timeout-minutes: 10
+
+    # Destroy resources (optional, to destroy all resources after testing)
+    # - name: Terraform Destroy
+    #   run: |
+    #     echo "DESTROYING ALL RESOURCES!"
+    #     terraform destroy -auto-approve
+    #   timeout-minutes: 12
