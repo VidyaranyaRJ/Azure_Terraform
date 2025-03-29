@@ -28,13 +28,6 @@ jobs:
       with:
         terraform_version: 1.5.0
 
-      # Set debug environment variables to get more information
-    - name: Set Debugging for GitHub Actions
-      run: |
-        echo "ACTIONS_STEP_DEBUG=true" >> $GITHUB_ENV
-        echo "ACTIONS_RUNNER_DEBUG=true" >> $GITHUB_ENV
-        echo "Debugging enabled!"
-
       # Set up Azure login with Service Principal
     - name: Set up Azure Credentials
       uses: azure/login@v1
