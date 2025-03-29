@@ -37,16 +37,16 @@ jobs:
           az group create --name vj-tf-backend --location "West US 2"
           
           # Create storage account if it doesn't exist
-          az storage account create --name vjtestsa1 --resource-group vj-tf-backend --sku Standard_LRS
+          az storage account create --name vjtfbackendsa2025 --resource-group vj-tf-backend --sku Standard_LRS
           
           # Create container if it doesn't exist
-          az storage container create --name terraform-state --account-name vjtestsa1
+          az storage container create --name terraform-state --account-name vjtfbackendsa2025
 
       - name: Terraform Init with Azure Backend
         run: |
           terraform init \
             -backend-config="resource_group_name=vj-tf-backend" \
-            -backend-config="storage_account_name=vjtestsa1" \
+            -backend-config="storage_account_name=vjtfbackendsa2025" \
             -backend-config="container_name=terraform-state" \
             -backend-config="key=terraform.tfstate"
         env:

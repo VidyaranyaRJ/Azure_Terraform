@@ -1,7 +1,7 @@
 terraform {
   backend "azurerm" {
     resource_group_name  = "vj-tf-backend"               # The resource group in Azure for the storage account
-    storage_account_name = "vjtestsa1"                   # The name of the storage account where the state file will be stored
+    storage_account_name = "vjtfbackendsa2025"           # Updated unique storage account name
     container_name       = "terraform-state"              # The blob container within the storage account to store the state file
     key                  = "terraform.tfstate"           # The name of the Terraform state file
   }
