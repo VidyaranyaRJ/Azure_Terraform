@@ -61,18 +61,18 @@ jobs:
     - name: Terraform Validate
       run: terraform validate
 
-      Terraform Plan (uncomment to enable)
+      # Terraform Plan (uncomment to enable)
     - name: Terraform Plan
       run: terraform plan -out=tfplan
       timeout-minutes: 5
 
-      Terraform Apply (uncomment to enable)
+      # Terraform Apply (uncomment to enable)
     - name: Terraform Apply
       if: github.ref == 'refs/heads/main' && github.event_name == 'push'
       run: terraform apply -auto-approve tfplan
       timeout-minutes: 10
 
-    #   # Destroy resources (optional, to destroy all resources after testing)
+    # Destroy resources (optional, to destroy all resources after testing)
     # - name: Terraform Destroy
     #   run: |
     #     echo "DESTROYING ALL RESOURCES!"
