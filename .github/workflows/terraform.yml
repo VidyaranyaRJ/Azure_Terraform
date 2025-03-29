@@ -96,6 +96,10 @@
 #     #     echo "DESTROYING ALL RESOURCES!"
 #     #     terraform destroy -auto-approve
 #     #   timeout-minutes: 12
+
+
+
+
 name: Terraform Deployment
 
 on:
@@ -136,6 +140,15 @@ jobs:
         allow-no-subscriptions: false
         audience: api://AzureADTokenExchange
         auth-type: SERVICE_PRINCIPAL
+
+      # Set environment variables for Terraform to authenticate with Azure using Service Principal
+    - name: Set Azure Service Principal credentials
+      run: |
+        echo "Setting up Azure credentials for Terraform"
+        echo "ARM_CLIENT_ID=${{ secrets.AZURE_CLIENT_ID }}" >> $GITHUB_ENV
+        echo "ARM_CLIENT_SECRET=${{ secrets.AZURE_CLIENT_SECRET }}" >> $GITHUB_ENV
+        echo "ARM_TENANT_ID=${{ secrets.AZURE_TENANT_ID }}" >> $GITHUB_ENV
+        echo "ARM_SUBSCRIPTION_ID=${{ secrets.AZURE_SUBSCRIPTION_ID }}" >> $GITHUB_ENV
 
       # Debugging step to check environment variables and login status
     - name: Debug Azure CLI login
