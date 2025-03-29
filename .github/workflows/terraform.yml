@@ -28,19 +28,11 @@ jobs:
       with:
         terraform_version: 1.5.0
 
-      # Set up Azure login with Service Principal
+      # Set up Azure login with Service Principal using creds
     - name: Set up Azure Credentials
       uses: azure/login@v1
       with:
-        client-id: ${{ secrets.AZURE_CLIENT_ID }}          # Azure Application Client ID
-        client-secret: ${{ secrets.AZURE_CLIENT_SECRET }}  # Azure Application Client Secret
-        tenant-id: ${{ secrets.AZURE_TENANT_ID }}          # Azure Directory (Tenant) ID
-        subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}  # Azure Subscription ID
-        auth-type: SERVICE_PRINCIPAL  # Using Service Principal authentication
-        enable-AzPSSession: false
-        environment: azurecloud
-        allow-no-subscriptions: false
-        audience: api://AzureADTokenExchange
+        creds: ${{ secrets.AZURE_CREDENTIALS }}  # Use the JSON credentials stored as a secret in GitHub
 
       # Debugging step to check environment variables and login status
     - name: Debug Azure CLI login
